@@ -1,4 +1,4 @@
 # XenoPT
 Garnet two-pyroxene thermobarometry package.
 
-Published package 'xenopt' on PyPI.
+https://pypi.org/project/xenopt/
