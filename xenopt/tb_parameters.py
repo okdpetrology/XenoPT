@@ -9,7 +9,7 @@ import os
 import csv
 #import copy
 #import sqlite3
-
+import warnings
 
 # Define Molar mass values in dictionary
 Oxide_Weight_conversions = {
@@ -27,7 +27,7 @@ Oxide_Weight_conversions = {
 
 owc = Oxide_Weight_conversions
 
-def moles_oxygen(dataframe):    
+def moles_oxygen(dataframe):
 
     xeno_master_work = {}
     for idx in range(len(dataframe)): 
@@ -72,28 +72,31 @@ def sum_and_factor(dd):
     #Input the dict of dicts (dd) from moles_oxygen definition
     mineral_sum = {}
     mineral_factor = {}
-    for sample in dd:
-        sample_sum = {"cpx": 0, "opx": 0, "olv": 0, "gt": 0}
-        sample_factor = {}
-        for entry in dd[sample]:
-            #print(entry)
-            #print(df[sample][entry])
-            if "cpx" in entry:
-                sample_sum["cpx"] = sample_sum["cpx"] + dd[sample][entry]
-            if "opx" in entry:
-                sample_sum["opx"] = sample_sum["opx"] + dd[sample][entry]
-            if "olv" in entry:
-                sample_sum["olv"] = sample_sum["olv"] + dd[sample][entry]
-            if "gt" in entry:
-                sample_sum["gt"] = sample_sum["gt"] + dd[sample][entry]
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="invalid value encountered in double_scalars")
+        warnings.filterwarnings("ignore", message="divide by zero encountered in double_scalars")
+        for sample in dd:
+            sample_sum = {"cpx": 0, "opx": 0, "olv": 0, "gt": 0}
+            sample_factor = {}
+            for entry in dd[sample]:
+                #print(entry)
+                #print(df[sample][entry])
+                if "cpx" in entry:
+                    sample_sum["cpx"] = sample_sum["cpx"] + dd[sample][entry]
+                if "opx" in entry:
+                    sample_sum["opx"] = sample_sum["opx"] + dd[sample][entry]
+                if "olv" in entry:
+                    sample_sum["olv"] = sample_sum["olv"] + dd[sample][entry]
+                if "gt" in entry:
+                    sample_sum["gt"] = sample_sum["gt"] + dd[sample][entry]
 
-        sample_factor["cpx"] = 1 / sample_sum["cpx"] * 6
-        sample_factor["opx"] = 1 / sample_sum["opx"] * 6
-        sample_factor["olv"] = 1 / sample_sum["olv"] * 4
-        sample_factor["gt"]  = 1 / sample_sum["gt"]  * 12
+            sample_factor["cpx"] = 1 / sample_sum["cpx"] * 6
+            sample_factor["opx"] = 1 / sample_sum["opx"] * 6
+            sample_factor["olv"] = 1 / sample_sum["olv"] * 4
+            sample_factor["gt"]  = 1 / sample_sum["gt"]  * 12
 
-        mineral_sum[sample] = sample_sum
-        mineral_factor[sample] = sample_factor
+            mineral_sum[sample] = sample_sum
+            mineral_factor[sample] = sample_factor
     return mineral_sum, mineral_factor
 
 def formula_units(dd, sample_factor):
@@ -115,41 +118,43 @@ def formula_units(dd, sample_factor):
                 working_factor = sample_factor[sample]["gt"]
 
             wf = working_factor
-                    
-            for element in owc:
-                if element in entry:
-                    
-                    if element == "Si":
-                        mineral_formula_units[entry] = dd[sample][entry] * wf / 2
-                        
-                    if element == "Ti":
-                        mineral_formula_units[entry] = dd[sample][entry] * wf / 2
-                        
-                    if element == "Al":
-                        mineral_formula_units[entry] = dd[sample][entry] * wf * 2/3
-                    
-                    if element == "Cr":
-                        mineral_formula_units[entry] = dd[sample][entry] * wf * 2/3
-                        
-                    if element == "Fe":
-                        mineral_formula_units[entry] = dd[sample][entry] * wf 
-                         
-                    if element == "Mn":
-                        mineral_formula_units[entry] = dd[sample][entry] * wf
-                        
-                    if element == "Ni":
-                        mineral_formula_units[entry] = dd[sample][entry] * wf
-                        
-                    if element == "Mg":
-                        mineral_formula_units[entry] = dd[sample][entry] * wf
-                        
-                    if element == "Ca":
-                        mineral_formula_units[entry] = dd[sample][entry] * wf
-                        
-                    if element == "Na":
-                        mineral_formula_units[entry] = dd[sample][entry] * wf * 2
-                    if element == "K":
-                        mineral_formula_units[entry] = dd[sample][entry] * wf * 2
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", message="invalid value encountered in double_scalars")
+                warnings.filterwarnings("ignore", message="divide by zero encountered in double_scalars")
+                for element in owc:
+                    if element in entry:
+
+                        if element == "Si":
+                            mineral_formula_units[entry] = dd[sample][entry] * wf / 2
+
+                        if element == "Ti":
+                            mineral_formula_units[entry] = dd[sample][entry] * wf / 2
+
+                        if element == "Al":
+                            mineral_formula_units[entry] = dd[sample][entry] * wf * 2/3
+
+                        if element == "Cr":
+                            mineral_formula_units[entry] = dd[sample][entry] * wf * 2/3
+
+                        if element == "Fe":
+                            mineral_formula_units[entry] = dd[sample][entry] * wf
+
+                        if element == "Mn":
+                            mineral_formula_units[entry] = dd[sample][entry] * wf
+
+                        if element == "Ni":
+                            mineral_formula_units[entry] = dd[sample][entry] * wf
+
+                        if element == "Mg":
+                            mineral_formula_units[entry] = dd[sample][entry] * wf
+
+                        if element == "Ca":
+                            mineral_formula_units[entry] = dd[sample][entry] * wf
+
+                        if element == "Na":
+                            mineral_formula_units[entry] = dd[sample][entry] * wf * 2
+                        if element == "K":
+                            mineral_formula_units[entry] = dd[sample][entry] * wf * 2
                            
         sample_formula_units[sample] = mineral_formula_units
         
@@ -168,10 +173,15 @@ def formula_units_fast(dataframe):
 #Site Occupancy
 
 
-def site_occupancy(wfu):
-    
+def site_occupancy(wfu, ferric_choice = 'stoichiometry'):
+    '''
+    Possible inputs for fc are:
+    (default input) stoichiometry = Calculate Fe3+ in cpx and opx based on cation stoichiometry.
+    kd_assumption =  Estimates of maximum Fe3+ as ~25% total iron and ~15% total iron, for cpx and opx, according to the range of data in Dyar et al. (1989) and Luth & Canil (1992).
+    [cpx_%Fe3+, opx_%Fe3+] = input a list containing values from 0 to 1 to manually set what percentage of total iron is Fe3+ in each phase.
+    '''
     site_occupancy = {}
-
+    fc = ferric_choice
     for sample in wfu:
         min_site = {}
         ms = min_site
@@ -211,8 +221,26 @@ def site_occupancy(wfu):
         # I don't agree with this for pyroxenes, but we are going to start out with this calculation, 
         # and figure out how to manually change it later
 
-        ms["cpx_Fe3+"] = (2 - wfu[sample]["cpx_Si"]) + wfu[sample]["cpx_Na"] - (wfu[sample]["cpx_Al"] - 2 + wfu[sample]["cpx_Si"] + wfu[sample]["cpx_Cr"] + (2 * wfu[sample]["cpx_Ti"]))
-        ms["opx_Fe3+"] = (2 - wfu[sample]["opx_Si"]) + wfu[sample]["opx_Na"] - (wfu[sample]["opx_Al"] - 2 + wfu[sample]["opx_Si"] + wfu[sample]["opx_Cr"] + (2 * wfu[sample]["opx_Ti"]))
+        # Working on Fe3+ fix, but not finished
+
+        if fc == 'stoichiometry':
+            ms["cpx_Fe3+"] = (2 - wfu[sample]["cpx_Si"]) + wfu[sample]["cpx_Na"] - (wfu[sample]["cpx_Al"] - 2 + wfu[sample]["cpx_Si"] + wfu[sample]["cpx_Cr"] + (2 * wfu[sample]["cpx_Ti"]))
+            ms["opx_Fe3+"] = (2 - wfu[sample]["opx_Si"]) + wfu[sample]["opx_Na"] - (wfu[sample]["opx_Al"] - 2 + wfu[sample]["opx_Si"] + wfu[sample]["opx_Cr"] + (2 * wfu[sample]["opx_Ti"]))
+
+        if fc == 'kd_assumption':
+            ## Estimates of maximum Fe3+ as ~25% total iron and ~15% total iron, for clinopyroxene and orthopyroxene,
+            # according to the range of data in Dyar et al. (1989) and Luth & Canil (1992).
+            ms["cpx_Fe3+"] = wfu[sample]["cpx_Fe"] * 0.25
+            ms["opx_Fe3+"] = wfu[sample]["opx_Fe"] * 0.15
+        # Future if statements should allow for manual set of cpx or opx Fe3+ = X% of Fe(total)
+        if type(fc) == "list":
+            ms["cpx_Fe3+"] = wfu[sample]["cpx_Fe"] * fc[0]
+            ms["opx_Fe3+"] = wfu[sample]["opx_Fe"] * fc[1]
+        else:
+            pass
+            #ms["cpx_Fe3+"] = pass
+            #ms["opx_Fe3+"] = pass
+
         ms["cpx_%Fe3+"] = 100 * ms["cpx_Fe3+"] / wfu[sample]["cpx_Fe"]
         ms["opx_%Fe3+"] = 100 * ms["opx_Fe3+"] / wfu[sample]["opx_Fe"]   
 
@@ -261,7 +289,6 @@ def site_occupancy(wfu):
 
     return site_occupancy
 
-    
 # Beyer site occupancy
 
 # note that Fe3+ will affect these results, so need to figure out how to manually change Fe3+ in wfu
@@ -288,8 +315,7 @@ def beyer_paramaters(wfu, so):
         ms['gt_XFe'] = wfu[sample]['gt_Fe'] / (wfu[sample]['gt_Fe'] + wfu[sample]['gt_Mg'] + wfu[sample]['gt_Ca'])
         ms['gt_XMg'] = wfu[sample]['gt_Mg'] / (wfu[sample]['gt_Fe'] + wfu[sample]['gt_Mg'] + wfu[sample]['gt_Ca'])
         ms['gt_XCa'] = wfu[sample]['gt_Ca'] / (wfu[sample]['gt_Fe'] + wfu[sample]['gt_Mg'] + wfu[sample]['gt_Ca'])
-        
-       
+
     
         #clinopyroxene site occupancy
         
@@ -344,8 +370,6 @@ def initial_parameters(input_csv):
 
     return parameters_list
 
-   
-
 def new_template():
     '''
 Makes a new xenolith data template .csv file for you to input your xenolith data.
@@ -354,17 +378,14 @@ Makes a new xenolith data template .csv file for you to input your xenolith data
     if os.path.isfile('xenolith_dataTemplate.csv'):
         print('Data template file already exists in the current directory.')
     else:
-        template = [{'Locality': 'Test 1', 'SampleID': 'test1', 'cpx_SiO2': '50.58964', 'cpx_TiO2': '0.588516', 'cpx_Al2O3': '8.649199', 'cpx_Cr2O3': '0.07089805', 'cpx_FeO': '3.376068', 'cpx_MnO': '0.03865455', 'cpx_NiO': '0', 'cpx_MgO': '13.091855', 'cpx_CaO': '19.602325', 'cpx_Na2O': '2.4164125', 'cpx_K2O': '0.00064325', 'cpx_Total': '98.42', 'opx_SiO2': '53.11461304', 'opx_TiO2': '0.120747652', 'opx_Al2O3': '5.781704348', 'opx_Cr2O3': '0.038188087', 'opx_FeO': '7.601890435', 'opx_MnO': '0.063495348', 'opx_NiO': '0', 'opx_MgO': '31.73361739', 'opx_CaO': '0.252286652', 'opx_Na2O': '0.041200913', 'opx_K2O': '6.15652E-05', 'opx_Total': '98.75', 'gt_SiO2': '41.11361667', 'gt_TiO2': '0.090340729', 'gt_Al2O3': '24.25045208', 'gt_Cr2O3': '0.058934667', 'gt_FeO': '10.53211667', 'gt_MnO': '0.224152396', 'gt_NiO': '0', 'gt_MgO': '19.20767083', 'gt_CaO': '4.561709375', 'gt_Na2O': '0.02429225', 'gt_K2O': '0', 'gt_Total': '100.06', 'olv_SiO2': '0', 'olv_TiO2': '0', 'olv_Al2O3': '0', 'olv_Cr2O3': '0', 'olv_FeO': '0', 'olv_MnO': '0', 'olv_NiO': '0', 'olv_MgO': '0', 'olv_CaO': '0', 'olv_Na2O': '0', 'olv_K2O': '0', 'olv_Total': '0'}, {'Locality': 'Test 2', 'SampleID': 'test2', 'cpx_SiO2': '50.93', 'cpx_TiO2': '0.68', 'cpx_Al2O3': '8.86', 'cpx_Cr2O3': '0.02', 'cpx_FeO': '5.45', 'cpx_MnO': '0.033', 'cpx_NiO': '0', 'cpx_MgO': '12.58', 'cpx_CaO': '17.64', 'cpx_Na2O': '3.02', 'cpx_K2O': '0', 'cpx_Total': '99.21', 'opx_SiO2': '52.92', 'opx_TiO2': '0.16', 'opx_Al2O3': '5.14', 'opx_Cr2O3': '0.01', 'opx_FeO': '11.45', 'opx_MnO': '0.09', 'opx_NiO': '0', 'opx_MgO': '29.13', 'opx_CaO': '0.55', 'opx_Na2O': '0.11', 'opx_K2O': '0', 'opx_Total': '99.56', 'gt_SiO2': '40.49', 'gt_TiO2': '0.14', 'gt_Al2O3': '23.85', 'gt_Cr2O3': '0.01', 'gt_FeO': '15.25', 'gt_MnO': '0.33', 'gt_NiO': '0', 'gt_MgO': '16.28', 'gt_CaO': '4.37', 'gt_Na2O': '0.03', 'gt_K2O': '0', 'gt_Total': '100.75', 'olv_SiO2': '0', 'olv_TiO2': '0', 'olv_Al2O3': '0', 'olv_Cr2O3': '0', 'olv_FeO': '0', 'olv_MnO': '0', 'olv_NiO': '0', 'olv_MgO': '0', 'olv_CaO': '0', 'olv_Na2O': '0', 'olv_K2O': '0', 'olv_Total': '0'}]
+        template = [{'Locality': 'Test 1', 'Reference': 'test study', 'SampleID': 'test1', 'cpx_SiO2': '50.58964', 'cpx_TiO2': '0.588516', 'cpx_Al2O3': '8.649199', 'cpx_Cr2O3': '0.07089805', 'cpx_FeO': '3.376068', 'cpx_MnO': '0.03865455', 'cpx_NiO': '0', 'cpx_MgO': '13.091855', 'cpx_CaO': '19.602325', 'cpx_Na2O': '2.4164125', 'cpx_K2O': '0.00064325', 'cpx_Total': '98.42', 'opx_SiO2': '53.11461304', 'opx_TiO2': '0.120747652', 'opx_Al2O3': '5.781704348', 'opx_Cr2O3': '0.038188087', 'opx_FeO': '7.601890435', 'opx_MnO': '0.063495348', 'opx_NiO': '0', 'opx_MgO': '31.73361739', 'opx_CaO': '0.252286652', 'opx_Na2O': '0.041200913', 'opx_K2O': '6.15652E-05', 'opx_Total': '98.75', 'gt_SiO2': '41.11361667', 'gt_TiO2': '0.090340729', 'gt_Al2O3': '24.25045208', 'gt_Cr2O3': '0.058934667', 'gt_FeO': '10.53211667', 'gt_MnO': '0.224152396', 'gt_NiO': '0', 'gt_MgO': '19.20767083', 'gt_CaO': '4.561709375', 'gt_Na2O': '0.02429225', 'gt_K2O': '0', 'gt_Total': '100.06', 'olv_SiO2': '0', 'olv_TiO2': '0', 'olv_Al2O3': '0', 'olv_Cr2O3': '0', 'olv_FeO': '0', 'olv_MnO': '0', 'olv_NiO': '0', 'olv_MgO': '0', 'olv_CaO': '0', 'olv_Na2O': '0', 'olv_K2O': '0', 'olv_Total': '0'},
+                    {'Locality': 'Test 2', 'Reference': 'test study', 'SampleID': 'test2', 'cpx_SiO2': '50.93', 'cpx_TiO2': '0.68', 'cpx_Al2O3': '8.86', 'cpx_Cr2O3': '0.02', 'cpx_FeO': '5.45', 'cpx_MnO': '0.033', 'cpx_NiO': '0', 'cpx_MgO': '12.58', 'cpx_CaO': '17.64', 'cpx_Na2O': '3.02', 'cpx_K2O': '0', 'cpx_Total': '99.21', 'opx_SiO2': '52.92', 'opx_TiO2': '0.16', 'opx_Al2O3': '5.14', 'opx_Cr2O3': '0.01', 'opx_FeO': '11.45', 'opx_MnO': '0.09', 'opx_NiO': '0', 'opx_MgO': '29.13', 'opx_CaO': '0.55', 'opx_Na2O': '0.11', 'opx_K2O': '0', 'opx_Total': '99.56', 'gt_SiO2': '40.49', 'gt_TiO2': '0.14', 'gt_Al2O3': '23.85', 'gt_Cr2O3': '0.01', 'gt_FeO': '15.25', 'gt_MnO': '0.33', 'gt_NiO': '0', 'gt_MgO': '16.28', 'gt_CaO': '4.37', 'gt_Na2O': '0.03', 'gt_K2O': '0', 'gt_Total': '100.75', 'olv_SiO2': '0', 'olv_TiO2': '0', 'olv_Al2O3': '0', 'olv_Cr2O3': '0', 'olv_FeO': '0', 'olv_MnO': '0', 'olv_NiO': '0', 'olv_MgO': '0', 'olv_CaO': '0', 'olv_Na2O': '0', 'olv_K2O': '0', 'olv_Total': '0'}]
         dff = pd.DataFrame(template)
-        frame = pd.DataFrame.transpose(dff)
-        frame.to_csv('xenolith_dataTemplate.csv', index = False)
-
+        dff.to_csv('xenolith_dataTemplate.csv', index = False)
         print('New template title "xenolith_dataTemplate.csv" should be in current directory!')
     return None
 
 #RUNNING CODE 
 
-
-
     
-
+c = initial_parameters('xenolith_dataTemplate.csv')
