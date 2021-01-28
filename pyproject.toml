@@ -1,18 +1,22 @@
 [tool.poetry]
 name = "XenoPT"
-version = "0.1.0"
+version = "0.2.0"
 description = "A collection of published thermobarometers for garnet two-pyroxene xenoliths. Allows for input of .csv data, with template provided in tb_parameters.py"
 authors = ["Khalil Droubi <droubi@wisc.edu>"]
 maintainers = []
 license = "MIT"
 readme = "README.md"
 homepage = ""
-repository = "https://github.com/okdpetrology/xenolith-thermobarometry/"
+repository = "https://github.com/okdpetrology/XenoPT"
 documentation = ""
 keywords = [
 "xenoliths",
 "thermobarometry",
-"Geoscience"
+"Geoscience",
+"garnet",
+"pyroxene",
+"barometer",
+"thermometer"
 ]
 
 [tool.poetry.dependencies]
