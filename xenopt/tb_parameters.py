@@ -60,8 +60,7 @@ def moles_oxygen(dataframe):
                     if element == "Na":
                         xeno_work[rename] = dataframe.loc[idx, row] / owc["Na"] 
                     if element == "K":
-                        xeno_work[rename] = dataframe.loc[idx, row] / owc["K"]                 
-
+                        xeno_work[rename] = dataframe.loc[idx, row] / owc["K"]
 
         name = dataframe.loc[idx, "SampleID"]   
         xeno_master_work[name] = xeno_work
@@ -175,7 +174,7 @@ def formula_units_fast(dataframe):
 
 def site_occupancy(wfu, ferric_choice = 'stoichiometry'):
     '''
-    Possible inputs for fc are:
+    Possible inputs for ferric_choice are:
     (default input) stoichiometry = Calculate Fe3+ in cpx and opx based on cation stoichiometry.
     kd_assumption =  Estimates of maximum Fe3+ as ~25% total iron and ~15% total iron, for cpx and opx, according to the range of data in Dyar et al. (1989) and Luth & Canil (1992).
     [cpx_%Fe3+, opx_%Fe3+] = input a list containing values from 0 to 1 to manually set what percentage of total iron is Fe3+ in each phase.
@@ -386,6 +385,3 @@ Makes a new xenolith data template .csv file for you to input your xenolith data
     return None
 
 #RUNNING CODE 
-
-    
-c = initial_parameters('xenolith_dataTemplate.csv')

@@ -357,7 +357,3 @@ geobarometer for mantle eclogites. Contributions to Mineralogy and Petrology, 16
     
     return pressure
     
-
-    
-    
-    

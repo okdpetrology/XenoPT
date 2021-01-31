@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "XenoPT"
-version = "0.2.0"
+version = "0.2.1"
 description = "A collection of published thermobarometers for garnet two-pyroxene xenoliths. Allows for input of .csv data, with template provided in tb_parameters.py"
 authors = ["Khalil Droubi <droubi@wisc.edu>"]
 maintainers = []
