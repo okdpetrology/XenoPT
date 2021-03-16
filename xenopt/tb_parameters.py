@@ -338,7 +338,7 @@ def beyer_paramaters(wfu, so):
 
     return site_occupancy       
 
-def initial_parameters(input_csv):
+def initial_parameters(input_csv, ferric_choice):
     '''
     Input your .csv file of xenolith data from the provided template, and this function will output a dictionary containing wfu, so, and bp.
 
@@ -359,7 +359,7 @@ def initial_parameters(input_csv):
 # These are the 3 dictionaries that contain factors for P-T calculations
 
     wfu = working_form_units
-    so = site_occupancy(wfu)
+    so = site_occupancy(wfu, ferric_choice)
     bp = beyer_paramaters(wfu, so)
 
 
